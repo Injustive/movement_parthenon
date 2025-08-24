@@ -148,7 +148,7 @@ class MovementRunner(ModernRunner):
         logger.info(f'Running {len(data_list)} accounts...')
         if 'chain' in self.action:
             data = self.chain_edges(data_list, chain_len=CHAIN_LENGTH)
-            ui_tasks = [asyncio.create_task(self.task_runner_ui(data)) for data in data_list]
+            ui_tasks = [asyncio.create_task(self.run_task_with_retry_ui(data)) for data in data_list]
             for pair in data:
                 for prev, _next in zip(*pair):
                     if prev is None:
@@ -162,7 +162,47 @@ class MovementRunner(ModernRunner):
                 tasks.append(asyncio.create_task(self.run_task_with_retry(data, pair)))
             results, _ = await asyncio.wait(tasks)
             await self.after_run(results)
-
+    
+    async def run_task_with_retry_ui(self, data):
+        client = data['client']
+        proxy = data['proxy']
+        proxy = proxy.session_proxy.get('http') if proxy.session_proxy else None
+        logger = Logger(client.address, additional={'pk': client.key,
+                                                    'proxy': proxy}).logger
+        extra_proxies = self.global_data['extra_proxies']
+        while True:
+            try:
+                return await self.task_runner_ui(data)
+            except MaxLenException:
+                logger.error(f"Task failed with exception: Cloudflare. Retrying...")
+                await sleep(5, 30)
+            except (RequestsError, ClientResponseError) as e:
+                if not extra_proxies:
+                    logger.error('There is no extra proxy available!')
+                    break
+                logger.error(f"Task failed with exception: {type(e)}: {e}. Trying to get extra proxy...")
+                random_proxy_index = random.randint(0, len(extra_proxies) - 1)
+                random_proxy = extra_proxies.pop(random_proxy_index)
+                logger.info(f'GOT PROXY {random_proxy}! Reconnecting...')
+                proxy = Proxy(proxy=random_proxy)
+                data['proxy'] = proxy
+                client.reconnect_with_new_proxy(proxy.w3_proxy)
+            except Exception as e:
+                if 'Page.goto: net::ERR_TIMED_OUT' in str(e):
+                    if not extra_proxies:
+                        logger.error('There is no extra proxy available!')
+                        break
+                    logger.error(f"Task failed with exception: {type(e)}: {e}. Trying to get extra proxy...")
+                    random_proxy_index = random.randint(0, len(extra_proxies) - 1)
+                    random_proxy = extra_proxies.pop(random_proxy_index)
+                    logger.info(f'GOT PROXY {random_proxy}! Reconnecting...')
+                    proxy = Proxy(proxy=random_proxy)
+                    data['proxy'] = proxy
+                    client.reconnect_with_new_proxy(proxy.w3_proxy)
+                    continue
+                logger.error(f"Task failed with exception: {type(e)}: {e}|[{traceback.format_exc()}]. Retrying...")
+                await sleep(5, 30)
+                
     async def run_task_with_retry(self, data, pair):
         client = data['client']
         proxy = data['proxy']
