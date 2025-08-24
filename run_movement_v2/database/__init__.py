@@ -1,0 +1,1 @@
+from .models import MovementBaseModel as base_project_model

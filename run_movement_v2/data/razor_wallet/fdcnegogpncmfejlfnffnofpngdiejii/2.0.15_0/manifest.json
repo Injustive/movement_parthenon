@@ -1,0 +1,47 @@
+{
+   "action": {
+      "default_icon": {
+         "16": "logo-16-dark.png",
+         "24": "logo-24-dark.png",
+         "32": "logo-32-dark.png"
+      },
+      "default_popup": "index.html"
+   },
+   "background": {
+      "service_worker": "service-worker-loader.js",
+      "type": "module"
+   },
+   "content_scripts": [ {
+      "all_frames": true,
+      "js": [ "assets/contentScript.ts-loader-D2LAsgGs.js" ],
+      "matches": [ "\u003Call_urls>" ],
+      "run_at": "document_start"
+   } ],
+   "description": "Your Gateway into Movement Ecosystem",
+   "host_permissions": [ "\u003Call_urls>" ],
+   "icons": {
+      "128": "logo-128-dark.png",
+      "16": "logo-16-dark.png",
+      "256": "logo-256-dark.png",
+      "48": "logo-48-dark.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvpF0dsCRWH+BTANJ/KY3rlTPpdlP16+OyI2Zo/nFMQijwNXXGlPZlvoTF1djKedkAU2gw/KWDZ3To+rWsd5i1Etw6ibJM++9/fteFW9lkrkdcRzHux2PjyyP6EVYN5V28dAMVXNqKNKhnBUuUc9wFI7zQS4W8mkaybzQpKf4lSX3k97qSGTScCDCavbIY9eF8cApXDf5FbDvYn3Jn1FWFNGXQrKZhGfb8iYm/JM8uipvAmlRGPMDw8AkHWSDxwR3XSx4NZOD4q9DS7SatwqebKxMOQRRPYdfmHAOXVSVoB42OCC9Vy7NZrS54VdEO1r4XooaartyoNoSQnqYZh/FMwIDAQAB",
+   "manifest_version": 3,
+   "name": "Razor Wallet",
+   "permissions": [ "storage", "tabs" ],
+   "side_panel": {
+      "default_path": "sidepanel.html"
+   },
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "2.0.15",
+   "version_name": "2.0.15",
+   "web_accessible_resources": [ {
+      "matches": [ "http://*/*", "https://*/*" ],
+      "resources": [ "injectScript.js" ],
+      "use_dynamic_url": false
+   }, {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "assets/index-BDnitI0T.js", "assets/contentScript.ts-C8mb-NdS.js" ],
+      "use_dynamic_url": false
+   } ]
+}

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-dark.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preload" href="/fonts/Satoshi-Bold.woff" as="font" type="font/woff" crossorigin />
+    <title>Razor Wallet</title>
+
+    <style>
+      * {
+        font-family: 'Satoshi', sans-serif;
+        box-sizing: border-box;
+      }
+
+      /**
+          Explicitly load Satoshi var from public/ so it does not block LCP's critical path.
+        */
+      @font-face {
+        font-family: 'Satoshi';
+        font-weight: 535;
+        font-style: normal;
+        font-display: block;
+        src: 
+          url('/fonts/Satoshi-Bold.woff') format('woff'),
+      }
+
+      @font-face {
+        font-family: 'Satoshi';
+        font-weight: 485;
+        font-style: normal;
+        font-display: block;
+        src: 
+          url('/fonts/Satoshi-Bold.woff') format('woff');
+      }
+
+      @supports (font-variation-settings: normal) {
+        * {
+          font-family: 'Satoshi', sans-serif;
+        }
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/sidepanel.html-CHvuHlFh.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/index-BDnitI0T.js">
+    <link rel="modulepreload" crossorigin href="/assets/version-D6HN2BJB.js">
+    <link rel="modulepreload" crossorigin href="/assets/main-DF7mBmkB.js">
+    <link rel="stylesheet" crossorigin href="/assets/main-B0lEOJn7.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

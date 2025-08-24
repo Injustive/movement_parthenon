@@ -1,0 +1,86 @@
+{
+   "action": {
+      "default_icon": {
+         "128": "static/icons/cs_logo-128.png",
+         "16": "static/icons/cs_logo-16.png",
+         "48": "static/icons/cs_logo-48.png"
+      },
+      "default_popup": "popup/popup.html",
+      "default_title": "__MSG_extName__"
+   },
+   "author": "__MSG_extAuthor__",
+   "background": {
+      "service_worker": "background.js"
+   },
+   "content_scripts": [ {
+      "all_frames": true,
+      "js": [ "/content/captchaDetector.js" ],
+      "match_about_blank": true,
+      "matches": [ "\u003Call_urls>" ],
+      "run_at": "document_start"
+   }, {
+      "all_frames": true,
+      "exclude_matches": [  ],
+      "js": [ "/content/reCaptchaIndex.js" ],
+      "match_about_blank": false,
+      "matches": [ "*://*.google.com/recaptcha/api2/*", "*://*.google.com/recaptcha/enterprise/*", "*://*.recaptcha.net/recaptcha/api2/*", "*://*.recaptcha.net/recaptcha/enterprise/*" ],
+      "run_at": "document_start"
+   }, {
+      "all_frames": true,
+      "exclude_matches": [  ],
+      "js": [ "/content/hCaptchaIndex.js" ],
+      "match_about_blank": false,
+      "matches": [ "*://*.hcaptcha.com/captcha/*" ],
+      "run_at": "document_start"
+   }, {
+      "all_frames": true,
+      "exclude_matches": [  ],
+      "js": [ "/content/mtCaptchaIndex.js" ],
+      "match_about_blank": false,
+      "matches": [ "*://*.mtcaptcha.com/mtcv1/*" ],
+      "run_at": "document_start"
+   }, {
+      "all_frames": true,
+      "exclude_matches": [  ],
+      "js": [ "/content/arkoseCaptchaIndex.js" ],
+      "match_about_blank": false,
+      "matches": [ "*://*.arkoselabs.com/fc/*", "*://*.funcaptcha.com/fc/*", "*://*/fc/assets/*" ],
+      "run_at": "document_start"
+   }, {
+      "js": [ "/content/manageIndex.js" ],
+      "matches": [ "https://solver2.minirpa.net/*" ],
+      "run_at": "document_start"
+   } ],
+   "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+   },
+   "declarative_net_request": {
+      "rule_resources": [ {
+         "enabled": true,
+         "id": "ruleset_1",
+         "path": "static/rules.json"
+      } ]
+   },
+   "default_locale": "en",
+   "description": "__MSG_extDesc__",
+   "host_permissions": [ "\u003Call_urls>" ],
+   "icons": {
+      "128": "static/icons/cs_logo-128.png",
+      "16": "static/icons/cs_logo-16.png",
+      "48": "static/icons/cs_logo-48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqIgOH6RU70e7z8E/+6W4YowEtukwKjPL3wtrtIiwT1izjGhEAY63H5MWHihO4e9l01DUE6T+knW4XDlFlCFv/vmcXeVJYVY0qolN3PWP4RgB42cwDR6AIQW9Gp/Zmsr4e3ogq03Jfeif/Lyx+EKdZ9e0p0znWfnT0qWZKXYN+ogf52yDK3bWs75HEaVQlRExJFYuG2ipu97ae77b/1aXC8Y0xdIDPgcm2vVlrQnimliSKb1OPUKpenb/48jWGaFTPetoiTlzbXLyrFDXIXtRHKdvTvxbE7rU58hVu3V794raWGfOauMdT40T2H3zUv23snVbmerH9WV5s1f5qjVkkQIDAQAB",
+   "manifest_version": 3,
+   "name": "__MSG_extName__",
+   "options_ui": {
+      "page": "options/options.html"
+   },
+   "permissions": [ "storage", "declarativeNetRequest", "alarms", "activeTab" ],
+   "short_name": "Captcha Solver",
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.0.10",
+   "web_accessible_resources": [ {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "static/wasm.wasm", "static/wasm-simd.wasm", "static/eJwrSo2vzM_JLzPVTUktSU0uyczPiy8z0MsvKgEAijwKGQ==", "static/eJwrzk-Jz8wrsYgvM9DLLyoBAC6zBbE=", "static/eJxLSywuCXb01S2Oz8wrsYgvM9DLLyoBAFPcB5o=", "static/eJzLzU_KzEnNSy0pM44vM9DLLyoBAEPaBvE=", "static/eJzzzU_KzEn1Sy0JM47PSSxKT40vTInPzCuxiC8z1MvPy6sAANRyDIA=", "static/rules.json", "static/ba.json", "options/options.html**", "/content/**", "popup/popup.html**" ]
+   } ]
+}
