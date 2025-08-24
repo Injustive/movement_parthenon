@@ -1,13 +1,4 @@
-cd "path_to_the_project"
+Full automate software for movement parthenon. All tasks!
 
-python -m venv venv
-
-cd venv/scripts
-
-activate
-
-cd ../..
-
-pip install -r requirements.txt
-
-python main.py
+GUIDE - https://teletype.in/@injustive/6kmV7_eHgLI
+TG - t.me/code_and_coin
