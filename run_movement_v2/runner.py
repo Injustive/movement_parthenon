@@ -40,8 +40,9 @@ class MovementRunner(ModernRunner):
                 session = get_session('https://parthenon.movementlabs.xyz', proxy.session_proxy)
                 try:
                     jwt = await db_manager.get_column(client.key, 'jwt_token')
-                    if not jwt:
-                        raise InvalidAccessToken("Invalid access token")
+                    if self.action != "Check balance":
+                        if not jwt:
+                            raise InvalidAccessToken("Invalid access token")
                     async with Task(session=session,
                                     client=client,
                                     db_manager=db_manager,
@@ -137,7 +138,6 @@ class MovementRunner(ModernRunner):
 
     async def prepare_db_run(self):
         self.prepared_data = self.prepare_data()
-        tasks = []
         try:
             data_list = await self.handle_db()
             self.data_list = data_list
@@ -150,11 +150,12 @@ class MovementRunner(ModernRunner):
             data = self.chain_edges(data_list, chain_len=CHAIN_LENGTH)
             ui_tasks = [asyncio.create_task(self.run_task_with_retry_ui(data)) for data in data_list]
             for pair in data:
+                tasks = []
                 for prev, _next in zip(*pair):
                     if prev is None:
                         continue
-                    tasks.append((asyncio.create_task(self.run_task_with_retry(prev, _next))))
-                    results, _ = await asyncio.wait(tasks)
+                    tasks.append(asyncio.create_task(self.run_task_with_retry(prev, _next)))
+                results, _ = await asyncio.wait(tasks)
             await asyncio.wait(ui_tasks)
         else:
             for i, data in enumerate(data_list):
@@ -162,7 +163,7 @@ class MovementRunner(ModernRunner):
                 tasks.append(asyncio.create_task(self.run_task_with_retry(data, pair)))
             results, _ = await asyncio.wait(tasks)
             await self.after_run(results)
-    
+
     async def run_task_with_retry_ui(self, data):
         client = data['client']
         proxy = data['proxy']
@@ -202,7 +203,7 @@ class MovementRunner(ModernRunner):
                     continue
                 logger.error(f"Task failed with exception: {type(e)}: {e}|[{traceback.format_exc()}]. Retrying...")
                 await sleep(5, 30)
-                
+
     async def run_task_with_retry(self, data, pair):
         client = data['client']
         proxy = data['proxy']
