@@ -158,6 +158,7 @@ class MovementRunner(ModernRunner):
                 results, _ = await asyncio.wait(tasks)
             await asyncio.wait(ui_tasks)
         else:
+            tasks = []
             for i, data in enumerate(data_list):
                 pair = data_list[i + CHAIN_LENGTH] if i + CHAIN_LENGTH < len(data_list) else None
                 tasks.append(asyncio.create_task(self.run_task_with_retry(data, pair)))
