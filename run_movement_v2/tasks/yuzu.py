@@ -341,7 +341,7 @@ class YuzuTask(Task):
             await self.check_move_balance()
             coins_to_deposit = []
             for coin in balance:
-                if coin != "MOVE":
+                if coin != "MOVE" and coin != "cvMOVE":
                     for coin_etalon in COINS:
                         if coin_etalon in coin:
                             move_price = (await self.prices()).json()['data']['prices'][0]['price']
