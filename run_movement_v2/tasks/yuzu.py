@@ -125,7 +125,7 @@ class YuzuTask(Task):
         for coin in balance:
             for coin_etalon in COINS:
                 if coin_etalon in coin:
-                    if coin != 'MOVE' and balance[coin][0]['raw_amount']:
+                    if coin != 'MOVE' and coin != 'cvMOVE' and balance[coin][0]['raw_amount']:
                         await self.swap(token_in=coin_etalon,
                                         token_out="MOVE",
                                         amount_in=balance[coin][0]['raw_amount'])
