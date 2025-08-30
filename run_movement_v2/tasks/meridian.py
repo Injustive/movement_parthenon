@@ -345,7 +345,7 @@ class MeridianTask(Task):
             await self.check_move_balance()
             coins_to_deposit = []
             for coin in balance:
-                if coin != "MOVE":
+                if coin != "MOVE" and coin != 'cvMOVE':
                     for coin_etalon in COINS:
                         if coin_etalon in coin:
                             coins = f'{COINS["MOVE"]["meridian_ticket"]},{COINS[coin_etalon]["meridian_ticket"]}'
