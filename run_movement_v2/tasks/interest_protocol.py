@@ -142,7 +142,7 @@ class InterestProtocolTask(Task):
             balance = (await self.get_user_balance()).json()['data']['current_fungible_asset_balances']
             coins_to_add_liquidity = []
             for coin in balance:
-                for coin_etalon in [coin for coin in COINS if coin != 'MOVE']:
+                for coin_etalon in [coin for coin in COINS if coin != 'MOVE' and coin != 'cvMOVE']:
                     if coin['token_standard'] == 'v2' and COINS[coin_etalon]['address'] == coin['asset_type'] and coin['amount']:
                         coins_to_add_liquidity.append([coin_etalon, coin['amount']])
             if not coins_to_add_liquidity:
