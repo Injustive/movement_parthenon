@@ -314,7 +314,7 @@ class Task(Logger, ModernTask):
         self.session.headers['Authorization'] = jwt
 
     @retry()
-    @check_res_status()
+    @check_res_status(expected_statuses=[200, 201, 401])
     async def wallet_connected(self):
         url = 'https://parthenon-api.movementlabs.xyz/api/users/wallet-connected'
         headers = {
@@ -360,8 +360,11 @@ class Task(Logger, ModernTask):
         return await self.session.post(url, headers=headers, json=json_data)
 
     async def main(self):
+        await self.check_move_balance(min_balance=100)
         await self.login()
-        await self.wallet_connected()
+        wallet_connected = await self.wallet_connected()
+        if wallet_connected.status_code == 401:
+            raise InvalidAccessToken("Need to update access token")
         from .tasks.meridian import MeridianTask
         from .tasks.mosaic import MosaicTask
         from .tasks.moveposition import MovepositionTask
