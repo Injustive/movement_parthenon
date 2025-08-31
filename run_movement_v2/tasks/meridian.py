@@ -126,7 +126,7 @@ class MeridianTask(Task):
         for coin in balance:
             for coin_etalon in COINS:
                 if coin_etalon in coin:
-                    if coin != 'MOVE' and balance[coin][0]['raw_amount']:
+                    if coin != 'MOVE' and coin != 'cvMOVE' and balance[coin][0]['raw_amount']:
                         coins = f'{COINS[coin_etalon]["meridian_ticket"]},{COINS["MOVE"]["meridian_ticket"]}'
                         coin_prices = (await self.get_coin_prices(coins)).json()['data']
                         coin_price, move_price = coin_prices
