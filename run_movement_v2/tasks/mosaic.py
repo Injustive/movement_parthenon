@@ -120,7 +120,7 @@ class MosaicTask(Task):
         for coin in balance:
             for coin_etalon in COINS:
                 if coin_etalon in coin:
-                    if coin != 'MOVE' and balance[coin][0]['raw_amount']:
+                    if coin != 'MOVE' and coin != 'cvMOVE' and balance[coin][0]['raw_amount']:
                         await self.swap(swap_from=coin_etalon, swap_to='MOVE', amount=balance[coin][0]['raw_amount'])
 
     async def swap_n(self, n_swaps=5, amounts=(1, 10), ensure_balance=5, check=0):
