@@ -1,0 +1,17 @@
+{
+   "extAuthor": {
+      "message": "miniRPA \u003Cservice@minirpa.net>"
+   },
+   "extDesc": {
+      "message": "Résout les problèmes hCaptcha,reCAPTCHA,MTCaptcha. Compatible avec Playwright,Puppeteer,NoCoding Data Scraper pour le web scraping"
+   },
+   "extName": {
+      "message": "Captcha Solver – Automate CAPTCHA Solving"
+   },
+   "extShortName": {
+      "message": ""
+   },
+   "lbl_logo": {
+      "message": "Résolveur MiniRPA CAPTCHA"
+   }
+}
