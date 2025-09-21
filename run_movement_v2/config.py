@@ -2,17 +2,19 @@ import os
 from utils.run_config import ROOT_DIR
 
 
-SLEEP_BETWEEN_WALLETS = 1, 300
+SLEEP_BETWEEN_WALLETS = 1, 3
 SLEEP_BETWEEN_TASKS = 10, 30
 SLEEP_FROM_TO = 600, 54000
 
-CAPTCHA_API_KEY = 'CSK_26d3c750cb8a1bc4968a1fae4a636882c5f2e7940b663c8263af8f7f7a7a8074' # https://chromewebstore.google.com/detail/captcha-solver-automate-c/hlifkpholllijblknnmbfagnkjneagid
+CAPTCHA_API_KEY = '' # https://chromewebstore.google.com/detail/captcha-solver-automate-c/hlifkpholllijblknnmbfagnkjneagid
 
 MANUAL_SOLVE_HCAPTCHA = False
 CHAIN_LENGTH = 3
 DONT_GO_NEXT_UNTIL_FULL_COMPLETE = True
 MAX_SWAP_TIMES = 100 # 50 / 100 / 250 / 500
 REMAIN_ON_WALLET_FOR_DAILY_TASKS = 3, 6
+
+WITHDRAW_BINANCE_AMOUNT = 240, 250
 
 SIMULTANEOUS_TASKS = 3
 

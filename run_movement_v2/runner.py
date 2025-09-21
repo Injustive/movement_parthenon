@@ -6,7 +6,7 @@ from .database.engine import MovementDbManager
 from .database.models import MovementBaseModel
 from .config import *
 import os
-from .paths import TWITTER_TOKENS, DISCORD_TOKENS
+from .paths import TWITTER_TOKENS, DISCORD_TOKENS, BITGET_DEPOSIT_ADDRESSES
 from patchright.async_api import async_playwright
 from .task_ui import TaskUi
 from .utils import InvalidAccessToken, NotEnoughMOVEException
@@ -17,6 +17,8 @@ import random
 from curl_cffi.requests.errors import RequestsError
 from aiohttp.client_exceptions import ClientResponseError
 from utils.models import Proxy
+from utils.modules.utils_bitget.bitget_main import BITGET
+from utils.config import CONFIG
 
 
 class MovementRunner(ModernRunner):
@@ -40,7 +42,7 @@ class MovementRunner(ModernRunner):
                 session = get_session('https://parthenon.movementlabs.xyz', proxy.session_proxy)
                 try:
                     jwt = await db_manager.get_column(client.key, 'jwt_token')
-                    if self.action != "Check balance":
+                    if self.action != "Check balance" and self.action != 'Exchange mode':
                         if not jwt:
                             raise InvalidAccessToken("Invalid access token")
                     async with Task(session=session,
@@ -89,15 +91,18 @@ class MovementRunner(ModernRunner):
                                 proxy = data['proxies'].proxy
                                 twitter_token = data['twitter_tokens']
                                 discord_token = data['discord_tokens']
+                                bitget_deposit_address = data['bitget_deposit_addresses']
                                 await db_manager.create_base_note(pk,
                                                                   proxy,
                                                                   twitter_token=twitter_token,
-                                                                  discord_token=discord_token)
+                                                                  discord_token=discord_token,
+                                                                  bitget_deposit_address=bitget_deposit_address)
                     except Exception:
                         os.remove(new_db)
                         raise
             self.db_name = new_db
         async with MovementDbManager(build_db_path(self.db_name), MovementBaseModel) as db_manager:
+            await self.db_manager.add_register_columns()
             return await db_manager.get_run_data()
 
     async def run_task_ui(self, session, client, db_manager):
@@ -133,7 +138,8 @@ class MovementRunner(ModernRunner):
         prepared_data = super().prepare_data()
         twitter_tokens = self.justify_data(prepared_data['clients'], list(get_data_lines(TWITTER_TOKENS)))
         discord_tokens = self.justify_data(prepared_data['clients'], list(get_data_lines(DISCORD_TOKENS)))
-        prepared_data.update({'twitter_tokens': twitter_tokens, 'discord_tokens': discord_tokens})
+        bitget_deposit_addresses = self.justify_data(prepared_data['clients'], list(get_data_lines(BITGET_DEPOSIT_ADDRESSES)))
+        prepared_data.update({'twitter_tokens': twitter_tokens, 'discord_tokens': discord_tokens, 'bitget_deposit_addresses': bitget_deposit_addresses})
         return prepared_data
 
     async def prepare_db_run(self):
@@ -269,3 +275,10 @@ class MovementRunner(ModernRunner):
         semaphore = asyncio.Semaphore(SIMULTANEOUS_TASKS)
         global_data.update({'semaphore': semaphore})
         return global_data
+
+    async def after_run(self, results):
+        print('All tasks are done! Sleeping for 15-20 minutes to transfer assets to main account... ')
+        await sleep(900, 1200)
+        if CONFIG.BITGET.ACCOUNT1.ACCOUNT.API_KEY:
+            bitget = BITGET(CONFIG.BITGET.ACCOUNT1.ACCOUNT, log=print)
+            bitget.withdraw_asset_from_all_subs("MOVE")

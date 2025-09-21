@@ -230,7 +230,7 @@ class CanopyTask(Task):
         return info
 
     @retry()
-    @check_res_status()
+    @check_res_status(expected_statuses=[200, 201, 500])
     async def get_withdrawal_hex_data(self, amount, pool_amount):
         url = 'https://api.moveposition.xyz/brokers/redeem/v2'
         headers = {
@@ -316,7 +316,13 @@ class CanopyTask(Task):
                 withdrawal_map_amount = await self.get_withdrawal_map_view(amount)
                 withdrawal_amount = await self.get_withdrawal_amount_moveposition(withdrawal_map_amount)
                 pool_amount = (await self.get_pool_amount()).json()['collaterals'][0]['amount']
-                packet_hex = (await self.get_withdrawal_hex_data(withdrawal_amount, pool_amount)).json()['packet']
+                if int(pool_amount) <= 0:
+                    return
+                packet_hex = await self.get_withdrawal_hex_data(withdrawal_amount, pool_amount)
+                if packet_hex.status_code not in [200, 201]:
+                    self.logger.error(f"Can't withdraw from canopy. {packet_hex.text}")
+                    return
+                packet_hex = packet_hex.json()['packet']
                 packet = bytes.fromhex(packet_hex)
                 withdrawal_payload = self.get_withdraw_payload_moveposition(packet, amount)
                 await self.complete_withdraw_moveposition(withdrawal_payload)

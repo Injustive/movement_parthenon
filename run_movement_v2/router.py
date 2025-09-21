@@ -5,11 +5,13 @@ class MovementRouter(MainRouter, DbRouter):
     def get_choices(self):
         return ['Start all',
                 'Start chain',
+                'Exchange mode',
                 'Daily tasks']
 
     def route(self, task, action):
         return dict(zip(self.get_choices(), [task.main,
                                              task.chain,
+                                             task.exchange_mode,
                                              task.daily_tasks]))[action]
 
     @property

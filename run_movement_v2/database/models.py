@@ -27,3 +27,4 @@ class MovementBaseModel(BaseModel):
     points_n: Mapped[int] = mapped_column(Integer, default=0)
     mandatory_tasks_completed: Mapped[bool] = mapped_column(Boolean, default=False)
     move_balance: Mapped[float] = mapped_column(Float, nullable=True)
+    bitget_deposit_address: Mapped[str] = mapped_column(String, nullable=True)

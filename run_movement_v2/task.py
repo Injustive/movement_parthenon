@@ -27,6 +27,9 @@ from aptos_sdk.transactions import EntryFunction, TransactionArgument, Serialize
 from aptos_sdk.type_tag import TypeTag, StructTag
 from aptos_sdk.account import AccountAddress
 from datetime import datetime, timedelta, timezone
+from utils.modules.utils_bitget.bitget_main import BITGET
+from utils.modules.utils_binance.binance_main import BINANCE
+from utils.config import CONFIG
 
 
 class Task(Logger, ModernTask):
@@ -864,3 +867,74 @@ class Task(Logger, ModernTask):
         xp = user_progress.json()['data']['accumulatedXP']
         self.logger.info(f"Your XP: {xp}")
         await self.db_manager.insert_column(self.client.key, 'points_n', xp)
+
+    async def wait_for_deposit(self, amount, wait_time=20):
+        deadline = time.time() + wait_time * 60
+        while True:
+            if time.time() > deadline:
+                return False
+            if (await self.move_balance)[1] >= amount:
+                return True
+            self.logger.info(f"Waiting for {amount} MOVE...")
+            await sleep(110, 120)
+
+    async def withdraw_to_bitget(self):
+        if not await self.db_manager.get_column(self.client.key, 'bitget_deposit_address'):
+            self.logger.error("Insert bitget_deposit_address to withdraw!")
+            return False
+        move_balance = await self.move_balance
+        human_balance = move_balance[1]
+        remain_on_wallet = round(random.uniform(*REMAIN_ON_WALLET_FOR_DAILY_TASKS), 2)
+        amount_to_send = human_balance - remain_on_wallet
+        if amount_to_send < 0 or amount_to_send > human_balance:
+            self.logger.error(f"You have only {human_balance} MOVE")
+            return False
+        send_to = await self.db_manager.get_column(self.client.key, 'bitget_deposit_address')
+        await self.transfer_move(send_to, int(amount_to_send * 10 ** 8))
+        self.logger.success(f"Successfully sent {amount_to_send} MOVE to {send_to}!")
+
+    async def exchange_mode(self):
+        binance = BINANCE(CONFIG.BINANCE.ACCOUNT1.ACCOUNT, log=self.logger)
+        wait_deposit_time = 20
+        if await self.db_manager.get_column(self.client.key, 'mandatory_tasks_completed'):
+            self.logger.info("All mandatory tasks completed. Going to next account...")
+            return
+        if (await self.move_balance)[1] < 110:
+            self.logger.info(f"Your MOVE balance is less than 110 MOVE. Withdrawing from binance...")
+            for attempt in range(1, 4):
+                amount_to_withdrawal = round(random.uniform(*WITHDRAW_BINANCE_AMOUNT), 6)
+                withdrawn_status = binance.withdraw_to(address=self.aptos_address,
+                                                       amount_to_withdrawal=amount_to_withdrawal,
+                                                       symbol_withdraw="MOVE",
+                                                       network="MOVE")
+                if not withdrawn_status:
+                    self.logger.error(f"Withdrawal failed. Trying again. Attempt {attempt}/3")
+                    await sleep(10, 30)
+                    continue
+                wait_deposit_status = await self.wait_for_deposit(amount_to_withdrawal-2, wait_time=wait_deposit_time)
+                if not wait_deposit_status:
+                    self.logger.error(f"Failed to check deposit after {wait_deposit_time}m. "
+                                      f"Trying again to withdraw. Attempt {attempt}/3")
+                    await sleep(10, 30)
+                    continue
+                self.logger.success(f"Withdrawal successful")
+                break
+            else:
+                self.logger.error(f"Failed to withdraw after 3 attempts. Exiting...")
+                return
+
+        while True:
+            balance = await self.get_all_balance()
+            if len(balance) > 1:
+                await self.login()
+                self.logger.info("Need teardown!")
+                await self.teardown()
+                continue
+            break
+        await self.check_move_balance(min_balance=110)
+        status = await self.main()
+        if DONT_GO_NEXT_UNTIL_FULL_COMPLETE:
+            if status:
+                await self.withdraw_to_bitget()
+        else:
+            await self.withdraw_to_bitget()
