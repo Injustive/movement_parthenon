@@ -102,7 +102,7 @@ class MovementRunner(ModernRunner):
                         raise
             self.db_name = new_db
         async with MovementDbManager(build_db_path(self.db_name), MovementBaseModel) as db_manager:
-            await self.db_manager.add_register_columns()
+            await db_manager.add_register_columns()
             return await db_manager.get_run_data()
 
     async def run_task_ui(self, session, client, db_manager):
