@@ -6,6 +6,22 @@ SOLVERS:
     LOCAL:
       MAX_WORKERS: 10
 
+
+BINANCE:
+  ACCOUNT1:
+    ACCOUNT:
+      API_KEY: ""
+      SECRET_KEY: ""
+
+
+BITGET:
+  ACCOUNT1:
+    ACCOUNT:
+      API_KEY: ""
+      SECRET_KEY: ""
+      PASSPHRASE: ""
+
+
 OKX:
   WITHDRAW_TO_OKX:
     AMOUNT_TYPE: "a" # p (percentage) / a (amount)
