@@ -14,6 +14,7 @@ import base64
 import json
 from ..utils import retry as api_retry
 from ..config import MAX_SWAP_TIMES
+from aptos_sdk.async_client import ApiError
 
 
 LPs = {
@@ -27,13 +28,16 @@ class YuzuTask(Task):
 
     @api_retry
     async def get_token_out(self, routes, token_in, amount_in):
-        pools_bytes = await self.aptos_client.view(function="0x46566b4a16a1261ab400ab5b9067de84ba152b5eb4016b217187f2a2ca980c5a::router::quote_swap_exact_in_multi_hops",
-                                                   type_arguments=[],
-                                                   arguments=[self.aptos_address,
-                                                              [{"inner": route} for route in routes],
-                                                              token_in,
-                                                              str(amount_in)])
-        return int(json.loads(pools_bytes.decode("utf-8"))[0])
+        try:
+            pools_bytes = await self.aptos_client.view(function="0x46566b4a16a1261ab400ab5b9067de84ba152b5eb4016b217187f2a2ca980c5a::router::quote_swap_exact_in_multi_hops",
+                                                       type_arguments=[],
+                                                       arguments=[self.aptos_address,
+                                                                  [{"inner": route} for route in routes],
+                                                                  token_in,
+                                                                  str(amount_in)])
+            return int(json.loads(pools_bytes.decode("utf-8"))[0])
+        except ApiError:
+            return 0
 
     @retry()
     @check_res_status()
