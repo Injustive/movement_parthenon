@@ -15,7 +15,7 @@ from .aptos.transactions import AptosTransactionService
 from .config import *
 import time
 import random
-from .utils import COINS, NotEnoughMOVEException, retry as api_retry, InvalidAccessToken, FailedSimulatedTransaction
+from .utils import NotEnoughMOVEException, retry as api_retry, InvalidAccessToken
 from utils.models import RpcProviders
 import json
 from collections import defaultdict
@@ -112,6 +112,8 @@ class Task(Logger, ModernTask):
         balances = balances['current_fungible_asset_balances']
         coin_with_balances = defaultdict(list)
         for coin in balances:
+            if coin['metadata']['symbol'] == 'MOVE Drops':
+                continue
             if coin['amount']:
                 decimals = coin['metadata']['decimals']
                 symbol = coin['metadata']['symbol']
