@@ -32,13 +32,20 @@ class TaskUi(Logger):
         await page.keyboard.press("Escape")
         await page.click(".connect-wallet-button")
         await page.click('span:has-text("Razor")')
-        async with self.context.expect_event("page", timeout=500_000) as popup_info:
-            pass
-        async with self.context.expect_event("page", timeout=5000) as inner_popup_info:
-            razor_page = await popup_info.value
-            await razor_page.click("text='Confirm'")
-        razor_page = await inner_popup_info.value
-        await razor_page.click("text='Sign'")
+        await sleep(2)
+        # async with self.context.expect_page(timeout=500_000) as popup_info:
+        #     pass
+        # async with self.context.expect_event("page", timeout=5000) as inner_popup_info:
+        #     razor_page = await popup_info.value
+        #     await razor_page.click("text='Confirm'")
+        # razor_page = await inner_popup_info.value
+        # await razor_page.click("text='Sign'")
+        page = self.context.pages[-1]
+        await page.click("text='Confirm'")
+        await sleep(2)
+        page = self.context.pages[-1]
+        await page.click("text='Sign'")
+        await page.close()
         verify_q = await self.start_verify_listener(self.context)
         token = await asyncio.wait_for(verify_q.get(), timeout=600)
         self.logger.success("Successfully got verify token!")
