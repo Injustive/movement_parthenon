@@ -28,6 +28,7 @@ class TaskUi(Logger):
             if c_page.url != page.url:
                 await c_page.close()
         await sleep(2)
+        verify_q = await self.start_verify_listener(self.context)
         await page.keyboard.press("Escape")
         await page.keyboard.press("Escape")
         await page.click(".connect-wallet-button")
@@ -40,13 +41,29 @@ class TaskUi(Logger):
         #     await razor_page.click("text='Confirm'")
         # razor_page = await inner_popup_info.value
         # await razor_page.click("text='Sign'")
-        page = self.context.pages[-1]
+
+        # page = self.context.pages[-1]
+        # await page.click("text='Confirm'")
+        # await sleep(2)
+        # page = self.context.pages[-1]
+        # await page.click("text='Sign'")
+        # await page.close()
+
+        razor_confirm_page = self.context.pages[-1]
+        page = await self.context.new_page()
+        await page.goto(razor_confirm_page.url)
         await page.click("text='Confirm'")
         await sleep(2)
-        page = self.context.pages[-1]
+        razor_sign_page = self.context.pages[-1]
+        page = await self.context.new_page()
+        await page.goto(razor_sign_page.url)
         await page.click("text='Sign'")
+        await sleep(2)
         await page.close()
-        verify_q = await self.start_verify_listener(self.context)
+
+        for page in self.context.pages:
+            if page.url != 'https://parthenon.movementlabs.xyz/':
+                await page.close()
         token = await asyncio.wait_for(verify_q.get(), timeout=600)
         self.logger.success("Successfully got verify token!")
         await self.db_manager.insert_column(self.client.key, 'jwt_token', token)
@@ -69,9 +86,9 @@ class TaskUi(Logger):
             razor_page = await popup_info.value
             await razor_page.click("text='Confirm'")
         razor_page = await inner_popup_info.value
-        await razor_page.click("text='Sign'")
-
+        await page.bring_to_front()
         verify_q = await self.start_verify_listener(self.context)
+        await razor_page.click("text='Sign'")
         token = await asyncio.wait_for(verify_q.get(), timeout=600)
         self.logger.success("Successfully got verify token!")
         await self.db_manager.insert_column(self.client.key, 'jwt_token', token)
@@ -183,7 +200,7 @@ class TaskUi(Logger):
         await page.fill('//html/body/div/div/div/div[2]/div[2]/div[2]/div/div[2]/div[2]/div/div/div[3]/div[2]/div/input', '100')
         await page.close()
 
-    async def start_verify_listener(self, context):
+    async def start_verify_listener(self, page):
         q = asyncio.Queue()
         async def handle(resp):
             try:
@@ -196,7 +213,7 @@ class TaskUi(Logger):
                     await q.put(data)
             except Exception:
                 pass
-        context.on("response", lambda r: asyncio.create_task(handle(r)))
+        page.on("response", lambda r: asyncio.create_task(handle(r)))
         return q
 
 class TwoStepWalletWatcher:
